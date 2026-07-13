@@ -6,6 +6,7 @@ import refactor.Vertex;
 import refactor.VertexDistance;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,12 +34,14 @@ public class GraphAlgorithms {
      *                                  doesn't exist in the graph
      */
     public static <T> List<Vertex<T>> bfs(Vertex<T> start, StaticGraph<T> graph) {
-        if (start == null || graph == null) {
-            throw new IllegalArgumentException("The start = null or the graph = null please fix.");
+         if (start == null) {
+            throw new IllegalArgumentException("Start is null");
         }
-
+        if (graph == null) {
+            throw new IllegalArgumentException("Graph is null");
+        }
         if (!graph.containsVertex(start)) {
-            throw new IllegalArgumentException("start is not in the graph.");
+            throw new IllegalArgumentException("Graph doesn't contain start vertex")
         }
 
         Set<Vertex<T>> visitedSet = new HashSet<>();
@@ -80,8 +83,21 @@ public class GraphAlgorithms {
      * lose all points for this method.
      */
     public static <T> List<Vertex<T>> dfs(Vertex<T> start, StaticGraph<T> graph) {
-        // Remove this line when you implement the method
-        throw new UnsupportedOperationException("Unimplemented");
+         if (start == null) {
+            throw new IllegalArgumentException("Start is null");
+        }
+        if (graph == null) {
+            throw new IllegalArgumentException("Graph is null");
+        }
+        if (!graph.containsVertex(start)) {
+            throw new IllegalArgumentException("Graph doesn't contain start vertex")
+        }
+
+        Set<Vertex<T>> vSet = new HashSet<>();
+        List<Vertex<T>> list = new ArrayList<>();
+
+        dfs(start, graph, vSet, list);
+        return list;
     }
 
     /**
@@ -94,8 +110,18 @@ public class GraphAlgorithms {
      * @param list  the list of vertices in visited order
      */
     private static <T> void dfs(Vertex<T> curr, StaticGraph<T> g, Set<Vertex<T>> vSet, List<Vertex<T>> list) {
-        // Remove this line when you implement the method
-        throw new UnsupportedOperationException("Unimplemented");
+        if (!vSet.contains(curr)) {
+            vSet.add(curr);
+            list.add(curr);
+            //For each vertex distance get the adjacent list and get the current vertex from that.
+            for (VertexDistance<T> vd : g.getAdjList().get(curr)) {
+                //then if the vertex distance's vertex isn't in the visited set then recursive call
+                //dfs
+                if (!vSet.contains(vd.vertex())) {
+                    dfs(vd.vertex(), g, vSet, list);
+                }
+            }
+        }
     }
 
     /**
@@ -116,10 +142,58 @@ public class GraphAlgorithms {
      * @throws IllegalArgumentException if any input is null, or if start
      *                                  doesn't exist in the graph.
      */
-    public static <T> Map<Vertex<T>, Integer> dijkstras(Vertex<T> start,
-                                                        StaticGraph<T> graph) {
-        // Remove this line when you implement the method
-        throw new UnsupportedOperationException("Unimplemented");
+    public static <T> Map<Vertex<T>, Integer> dijkstras(Vertex<T> start, StaticGraph<T> graph) {
+         if (start == null) {
+            throw new IllegalArgumentException("Start is null");
+        }
+        if (graph == null) {
+            throw new IllegalArgumentException("Graph is null");
+        }
+        if (!graph.containsVertex(start)) {
+            throw new IllegalArgumentException("Graph doesn't contain start vertex")
+        }
+
+        //You need a distance hashmap of type which you're returning
+        Map<Vertex<T>, Integer> dist = new HashMap<>();
+        //You need a visited set of type vertex<T>
+        Set<Vertex<T>> vSet = new HashSet<>();
+        //You need a PrioirityQueue
+        PriorityQueue<Vertex<T>> pq = new PriorityQueue<>();
+
+        //For each vertex in the graph we loop through and 
+        //put the distance from that into the dist HashMap w/ the max value of the weights
+        for (Vertex<T> v : graph.getVertices()) {
+            dist.put(v, Integer.MAX_VALUE);
+        }
+
+        //Now put dist start with 0 to start here
+        dist.put(start, 0);
+        pq.add(new VertexDistance<T>(start, 0));
+
+        //Loop while pq is NOT empty AND vSet.size() is less than graph's verticies size
+        while (!pq.isEmpty() && vSet.size() < graph.getVertices().size()) {
+            VertexDistance<T> curr = pq.poll();
+            Vertex<T> u = curr.vertex();
+
+            //If visited doesn't contain u then add u to visitedSet
+            if (!vSet.contains(u)) {
+                vSet.add(u);
+
+                for (VertexDistance<T> next : graph.getAdjList().get(u)) {
+                    //If the visited set doesn't contain the next vertex
+                    if (!vSet.contains(next)) {
+                        //new distance = curr dist + next dist
+                        int newDist = dist.get(u) + next.distance();
+                        if (newDist < dist.get(next.getVertex())) {
+                            dist.put(next.vertex(), newDist);
+                            pq.add(new VertexDistance<>(next.vertex(), newDist));
+                        }
+                    }
+                }
+            }
+            return dist;
+        }
+
     }
 
     /**
@@ -137,8 +211,17 @@ public class GraphAlgorithms {
      *                                  doesn't exist in the graph.
      */
     public static <T> Set<Edge<T>> prims(Vertex<T> start, StaticGraph<T> graph) {
-        // Remove this line when you implement the method
-        throw new UnsupportedOperationException("Unimplemented");
+        if (start == null) {
+            throw new IllegalArgumentException("Start is null");
+        }
+        if (graph == null) {
+            throw new IllegalArgumentException("Graph is null");
+        }
+        if (!graph.containsVertex(start)) {
+            throw new IllegalArgumentException("Graph doesn't contain start vertex")
+        }
+
+
     }
 
     /**
