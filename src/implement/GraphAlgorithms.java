@@ -220,8 +220,22 @@ public class GraphAlgorithms {
         if (!graph.containsVertex(start)) {
             throw new IllegalArgumentException("Graph doesn't contain start vertex")
         }
+        //init Set vSet
+        Set<Vertex<T>> vSet = new HashSet<>();
 
+        //init EdgeSet
+        Set<Edge<T>> eSet = new HashSet<>();
 
+        //init pq
+        PriorityQueue<T> pq = new PriorityQueue<>();
+        vSet.add(start);
+        for (VertexDistance<T> vd : graph.getAdjList().get(start)) {
+            pq.add(new Edge<>(start, vd.vertex(), vd.distance()));
+        }
+
+        while () {
+            
+        }
     }
 
     /**
