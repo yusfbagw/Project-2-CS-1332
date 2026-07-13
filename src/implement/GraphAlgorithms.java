@@ -3,9 +3,15 @@ package implement;
 import refactor.Edge;
 import refactor.StaticGraph;
 import refactor.Vertex;
+import refactor.VertexDistance;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 
 /**
@@ -27,8 +33,34 @@ public class GraphAlgorithms {
      *                                  doesn't exist in the graph
      */
     public static <T> List<Vertex<T>> bfs(Vertex<T> start, StaticGraph<T> graph) {
-        // Remove this line when you implement the method
-        throw new UnsupportedOperationException("Unimplemented");
+        if (start == null || graph == null) {
+            throw new IllegalArgumentException("The start = null or the graph = null please fix.");
+        }
+
+        if (!graph.containsVertex(start)) {
+            throw new IllegalArgumentException("start is not in the graph.");
+        }
+
+        Set<Vertex<T>> visitedSet = new HashSet<>();
+        Queue<Vertex<T>> queue = new LinkedList<>();
+        List<Vertex<T>> list = new ArrayList<>();
+
+        queue.add(start);
+        visitedSet.add(start);
+
+        while (!queue.isEmpty()) {
+            Vertex<T> curr = queue.remove();
+            list.add(curr);
+
+            for (VertexDistance<T> vd : graph.getNeighbors(curr)) {
+                Vertex<T> neighbor = vd.vertex();
+                if (!visitedSet.contains(neighbor)) {
+                    visitedSet.add(neighbor);
+                    queue.add(neighbor);
+                }
+            }
+        }
+        return list;
     }
 
     /**
