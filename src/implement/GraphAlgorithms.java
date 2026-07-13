@@ -223,8 +223,8 @@ public class GraphAlgorithms {
         //init Set vSet
         Set<Vertex<T>> vSet = new HashSet<>();
 
-        //init EdgeSet
-        Set<Edge<T>> eSet = new HashSet<>();
+        //init MST
+        Set<Edge<T>> mst = new HashSet<>();
 
         //init pq
         PriorityQueue<T> pq = new PriorityQueue<>();
@@ -233,9 +233,29 @@ public class GraphAlgorithms {
             pq.add(new Edge<>(start, vd.vertex(), vd.distance()));
         }
 
-        while () {
-            
+        while (!pq.isEmpty() && visited.size() < graph.getVertices()) {
+            Edge<T> curr = pq.poll();
+            Vertex<T> vertex = curr.v();
+
+            if (!vSet.contains(vertex)) {
+                vSet.add(vertex);
+                mst.add(curr);
+                mst.add(new Edge<>(vertex, curr.u(), curr.weight()));
+
+                for (VertexDistance<T> next : graph.getAdjList().get(v)) {
+                    if (!vSet.contains(next.vertex())) {
+                        pq.add(new Edge<>(vertex, next.vertex(), next.distance()));
+                    }
+                }
+            }
+
         }
+
+        if (vSet.size() != graph.getVertices().size()) {
+            return null;
+        }
+
+        return mst;
     }
 
     /**
@@ -251,8 +271,30 @@ public class GraphAlgorithms {
      * @throws IllegalArgumentException if any input is null
      */
     public static <T> Set<Edge<T>> kruskals(StaticGraph<T> graph) {
-        // Remove this line when you implement the method
-        throw new UnsupportedOperationException("Unimplemented");
-    }
+        if (graph == null) {
+            throw new IllegalArgumentException("Graph is null can't be null.");
+        }
 
+        DisjointSet<Vertex<T>> ds = new DisjointSet<>();
+        Set<Edge<T>> mst = new HashSet<>();
+        PriorityQueue<Edge<T>> pq = new PriorityQueue<>(graph.getEdges());
+
+        //Similar mst.size() < (graph.getVertices().size() - 1) * 2
+        while (!pq.isEmpty() && mst.size() < (graph.getVertices().size() - 1) * 2) {
+            Edge<T> e = pq.poll();
+            Vertex<T> u = e.u();
+            Vertex<T> v = e.v();
+
+            if (!ds.find(u).equals(ds.find(v))) {
+                mst.add(e);
+                mst.add(new Edge<>(v, u, e.weight()));
+                ds.union(u, v);
+            }
+        }
+        //Similar mst.size() < (graph.getVertices().size() - 1) * 2
+        if (mst.size() != (graph.getVertices().size() - 1) * 2) {
+            return null;
+        }
+        return mst;
+    }
 }
