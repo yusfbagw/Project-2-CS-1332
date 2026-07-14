@@ -76,7 +76,28 @@ public class WaddleWorks implements StaticWaddleWorks {
      * @implSpec {@code O(1)} runtime
      */
     public boolean addRoad(Intersection a, Intersection b, int duration) {
+        if (duration < 0) {
+            throw new IllegalArgumentException("Duration can't be negative.");
+        }
+        if (a == null || b == null) {
+            throw new IllegalArgumentException("Intersection can't be null.");
+        }
 
+        //We create the verticies for the intersections.
+        Vertex<Intersection> vertexA = new Vertex<>(a);
+        Vertex<Intersection> vertexB = new Vertex<>(b);
+        //We gotta look at if it contains both.
+        boolean containsBoth = roads.containsVertex(vertexB) && roads.containsVertex(vertexA);
+        
+        //They have to be in different neighborhoods.
+        //We figure out if a and b already existed in roads.
+        boolean connectsTwo = containsBoth && !(neighborhoods.find(a).equals(neighborhoods.find(b)));
+        
+        Edge<Intersection> newEdge = new Edge<>(vertexA, vertexB, duration);
+        
+        roads.addEdge(newEdge);
+        neighborhoods.union(a, b);
+        return connectsTwo;
     }
 
     /**
@@ -88,6 +109,16 @@ public class WaddleWorks implements StaticWaddleWorks {
      * @implSpec {@code O(1)} runtime
      */
     public void addWire(Building a, Building b, int length) {
+        if (length < 0) {
+            throw new IllegalArgumentException("The length can't be negative.");
+        }
+        if (a == null) {
+            throw new IllegalArgumentException("The buidling A can't be negative.");
+        }
+        if (b == null) {
+            throw new IllegalArgumentException("The buidling B can't be negative.");
+        }
 
+        
     }
 }  
