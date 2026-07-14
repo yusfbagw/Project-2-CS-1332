@@ -9,6 +9,8 @@ import java.util.Set;
 
 
 public class ExtensionGraph<T> extends MutableGraph<T> {
+    //the adj list is the for every vertex you keep a list of other vertices
+    //its directly connected to. (DIRECTLY CONNECTED BY AN EDGE)
     private final Map<Vertex<T>, List<VertexDistance<T>>> adjList;
 
     public ExtensionGraph(Set<Vertex<T>> vertices, Set<Edge<T>> edges){

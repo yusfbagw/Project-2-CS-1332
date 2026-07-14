@@ -1,5 +1,5 @@
 package implement;
-
+import refactor.DisjointSet;
 import refactor.Edge;
 import refactor.StaticGraph;
 import refactor.Vertex;
@@ -41,7 +41,7 @@ public class GraphAlgorithms {
             throw new IllegalArgumentException("Graph is null");
         }
         if (!graph.containsVertex(start)) {
-            throw new IllegalArgumentException("Graph doesn't contain start vertex")
+            throw new IllegalArgumentException("Graph doesn't contain start vertex");
         }
 
         Set<Vertex<T>> visitedSet = new HashSet<>();
@@ -90,7 +90,7 @@ public class GraphAlgorithms {
             throw new IllegalArgumentException("Graph is null");
         }
         if (!graph.containsVertex(start)) {
-            throw new IllegalArgumentException("Graph doesn't contain start vertex")
+            throw new IllegalArgumentException("Graph doesn't contain start vertex");
         }
 
         Set<Vertex<T>> vSet = new HashSet<>();
@@ -114,7 +114,7 @@ public class GraphAlgorithms {
             vSet.add(curr);
             list.add(curr);
             //For each vertex distance get the adjacent list and get the current vertex from that.
-            for (VertexDistance<T> vd : g.getAdjList().get(curr)) {
+            for (VertexDistance<T> vd : g.getNeighbors(curr)) {
                 //then if the vertex distance's vertex isn't in the visited set then recursive call
                 //dfs
                 if (!vSet.contains(vd.vertex())) {
@@ -150,15 +150,15 @@ public class GraphAlgorithms {
             throw new IllegalArgumentException("Graph is null");
         }
         if (!graph.containsVertex(start)) {
-            throw new IllegalArgumentException("Graph doesn't contain start vertex")
+            throw new IllegalArgumentException("Graph doesn't contain start vertex");
         }
 
         //You need a distance hashmap of type which you're returning
         Map<Vertex<T>, Integer> dist = new HashMap<>();
         //You need a visited set of type vertex<T>
         Set<Vertex<T>> vSet = new HashSet<>();
-        //You need a PrioirityQueue
-        PriorityQueue<Vertex<T>> pq = new PriorityQueue<>();
+        //You need a PrioirityQueue holds vertexdistance not vertex
+        PriorityQueue<VertexDistance<T>> pq = new PriorityQueue<>();
 
         //For each vertex in the graph we loop through and 
         //put the distance from that into the dist HashMap w/ the max value of the weights
@@ -184,16 +184,15 @@ public class GraphAlgorithms {
                     if (!vSet.contains(next)) {
                         //new distance = curr dist + next dist
                         int newDist = dist.get(u) + next.distance();
-                        if (newDist < dist.get(next.getVertex())) {
+                        if (newDist < dist.get(next.vertex())) {
                             dist.put(next.vertex(), newDist);
                             pq.add(new VertexDistance<>(next.vertex(), newDist));
                         }
                     }
                 }
             }
-            return dist;
         }
-
+        return dist;
     }
 
     /**
@@ -218,7 +217,7 @@ public class GraphAlgorithms {
             throw new IllegalArgumentException("Graph is null");
         }
         if (!graph.containsVertex(start)) {
-            throw new IllegalArgumentException("Graph doesn't contain start vertex")
+            throw new IllegalArgumentException("Graph doesn't contain start vertex");
         }
         //init Set vSet
         Set<Vertex<T>> vSet = new HashSet<>();
@@ -227,13 +226,13 @@ public class GraphAlgorithms {
         Set<Edge<T>> mst = new HashSet<>();
 
         //init pq
-        PriorityQueue<T> pq = new PriorityQueue<>();
+        PriorityQueue<Edge<T>> pq = new PriorityQueue<>();
         vSet.add(start);
-        for (VertexDistance<T> vd : graph.getAdjList().get(start)) {
-            pq.add(new Edge<>(start, vd.vertex(), vd.distance()));
+        for (VertexDistance<T> vd : graph.getNeighbors(start)) {
+            pq.add(new Edge<T>(start, vd.vertex(), vd.distance()));
         }
 
-        while (!pq.isEmpty() && visited.size() < graph.getVertices()) {
+        while (!pq.isEmpty() && vSet.size() < graph.getVertices().size()) {
             Edge<T> curr = pq.poll();
             Vertex<T> vertex = curr.v();
 
@@ -242,9 +241,9 @@ public class GraphAlgorithms {
                 mst.add(curr);
                 mst.add(new Edge<>(vertex, curr.u(), curr.weight()));
 
-                for (VertexDistance<T> next : graph.getAdjList().get(v)) {
+                for (VertexDistance<T> next : graph.getNeighbors(vertex)) {
                     if (!vSet.contains(next.vertex())) {
-                        pq.add(new Edge<>(vertex, next.vertex(), next.distance()));
+                        pq.add(new Edge<T>(vertex, next.vertex(), next.distance()));
                     }
                 }
             }
@@ -274,7 +273,7 @@ public class GraphAlgorithms {
         if (graph == null) {
             throw new IllegalArgumentException("Graph is null can't be null.");
         }
-
+        
         DisjointSet<Vertex<T>> ds = new DisjointSet<>();
         Set<Edge<T>> mst = new HashSet<>();
         PriorityQueue<Edge<T>> pq = new PriorityQueue<>(graph.getEdges());
