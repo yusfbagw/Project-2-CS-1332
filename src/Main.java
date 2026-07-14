@@ -1,7 +1,9 @@
 import apply.Building;
 import apply.Intersection;
 import apply.StaticWaddleWorks;
+import apply.WaddleWorks;
 import refactor.Edge;
+import refactor.ExtensionGraph;
 import refactor.MutableGraph;
 import refactor.Vertex;
 
@@ -43,8 +45,14 @@ public class Main {
      * if the vertex set doesn't contain all the vertices.
      */
     public static <T> MutableGraph<T> getMutableGraphInstance(Set<Vertex<T>> vertices,Set<Edge<T>> edges) {
-        // Replace the line below
-        throw new UnsupportedOperationException("Instantiate your class here!");
+       if (vertices == null) {
+        throw new IllegalArgumentException("verticies arg cant be null");
+       }
+       if (edges == null) {
+        throw new IllegalArgumentException("edges arg cant be null.");
+       }
+
+       return new ExtensionGraph<>(vertices, edges);
     }
 
     /**
@@ -56,7 +64,6 @@ public class Main {
      * @return a new {@link StaticWaddleWorks} instance
      */
     public static StaticWaddleWorks getWaddleWorksInstance(MutableGraph<Intersection> roads, MutableGraph<Building> grid) {
-        // Replace the line below
-        throw new UnsupportedOperationException("Instantiate your class here!");
+        return new WaddleWorks(roads, grid);
     }
 }

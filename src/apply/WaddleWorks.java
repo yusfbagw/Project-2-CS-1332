@@ -8,7 +8,6 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
-import javax.lang.model.type.IntersectionType;
 import javax.swing.text.html.parser.Element;
 
 import apply.Intersection.Type;
@@ -311,7 +310,7 @@ public class WaddleWorks implements StaticWaddleWorks {
             throw new IllegalArgumentException("Avoid can't be null.");
         }
 
-        
+
         Intersection start = from.closest();
         Intersection end = to.closest();
         //Create the intersection verticies
