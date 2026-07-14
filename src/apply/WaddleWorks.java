@@ -118,7 +118,41 @@ public class WaddleWorks implements StaticWaddleWorks {
         if (b == null) {
             throw new IllegalArgumentException("The buidling B can't be negative.");
         }
-
+        //operation would cause the Grid graph to have distinct connected components.
+        if (a.closest() != null && !roads.containsVertex(new Vertex<>(a.closest()))) {
+            throw new IllegalArgumentException("operation would cause the Grid graph to have distinct connected components.");
+        }
+        if (b.closest() != null && !roads.containsVertex(new Vertex<>(b.closest()))) {
+            throw new IllegalArgumentException("operation would cause the Grid graph to have distinct connected components.");
+        }
         
+        boolean aInGrid = grid.containsVertex(new Vertex<>(a));
+        boolean bInGrid = grid.containsVertex(new Vertex<>(b));
+        boolean gridEmpty = grid.getVertexCount() != 0;
+
+        if (!aInGrid && !bInGrid && !gridEmpty) {
+            throw new IllegalArgumentException("Adding this wire would disconect the grid.");
+        }
+
+        grid.addEdge(new Edge<>(new Vertex<>(a), new Vertex<>(b), length));
     }
+
+    /**
+     * Gets the current state of the road network.
+     *
+     * @return the current state of the road network
+     */
+    public StaticGraph<Intersection> getRoads() {
+        return roads;
+    }
+     /**
+     * Gets the current state of the electrical grid.
+     *
+     * @return the current state of the electrical grid
+     */
+    public StaticGraph<Building> getGrid() {
+        return grid;
+    }
+
+    
 }  
