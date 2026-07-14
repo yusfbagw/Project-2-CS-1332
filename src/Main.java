@@ -10,10 +10,10 @@ import java.util.Set;
 /**
  * Entry point for accessing your project 3 files.
  *
- * @author YOUR NAME HERE
+ * @author Yusuf Bagwan
  * @version 1.0
- * @userid YOUR USER ID HERE (i.e. gburdell3)
- * @GTID YOUR GT ID HERE (i.e. 900000000)
+ * @userid ybagwan3 (i.e. gburdell3)
+ * @GTID 903891335 (i.e. 900000000)
  * <br>
  * <p>
  * Collaborators: LIST ALL COLLABORATORS YOU WORKED WITH HERE
@@ -27,7 +27,7 @@ import java.util.Set;
  * points.
  *<p>
  *<br>
- * Agree Here: REPLACE THIS TEXT
+ * Agree Here: I agree
  */
 public class Main {
 
@@ -42,8 +42,7 @@ public class Main {
      * @throws IllegalArgumentException if any of the arguments are null, or
      * if the vertex set doesn't contain all the vertices.
      */
-    public static <T> MutableGraph<T> getMutableGraphInstance(Set<Vertex<T>> vertices,
-                                                              Set<Edge<T>> edges) {
+    public static <T> MutableGraph<T> getMutableGraphInstance(Set<Vertex<T>> vertices,Set<Edge<T>> edges) {
         // Replace the line below
         throw new UnsupportedOperationException("Instantiate your class here!");
     }
@@ -56,8 +55,7 @@ public class Main {
      * @param grid the initial graph of the electrical grid network
      * @return a new {@link StaticWaddleWorks} instance
      */
-    public static StaticWaddleWorks getWaddleWorksInstance(MutableGraph<Intersection> roads,
-                                                           MutableGraph<Building> grid) {
+    public static StaticWaddleWorks getWaddleWorksInstance(MutableGraph<Intersection> roads, MutableGraph<Building> grid) {
         // Replace the line below
         throw new UnsupportedOperationException("Instantiate your class here!");
     }

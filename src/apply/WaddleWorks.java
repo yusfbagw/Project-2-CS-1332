@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
@@ -306,8 +307,90 @@ public class WaddleWorks implements StaticWaddleWorks {
         if (to.closest() == null) {
             throw new IllegalArgumentException("Building has no closest intersection.");
         }
+        if (avoid == null) {
+            throw new IllegalArgumentException("Avoid can't be null.");
+        }
 
+        
+        Intersection start = from.closest();
+        Intersection end = to.closest();
+        //Create the intersection verticies
+        Vertex<Intersection> startVertex = new Vertex<>(start);
+        Vertex<Intersection> endVertex = new Vertex<>(end);
 
+        //Two parallel HashMaps for storing two costs per vertex
+        Map<Vertex<Intersection>, Integer> badCount = new HashMap<>(); // The fewest bad to reach each vertex
+        Map<Vertex<Intersection>, Integer> durration = new HashMap<>(); // The duration of the best path
+
+        Map<Vertex<Intersection>, Vertex<Intersection>> parent = new HashMap<>(); // Who the you come from ur "parent"
+        PriorityQueue<Route> pq = new PriorityQueue<>();
+        
+        int startBad = avoid.contains(start.type()) ? 1 : 0;
+        badCount.put(startVertex, startBad);
+        durration.put(startVertex, 0);
+        pq.add(new Route(startVertex, startBad, 0));
+
+        while (!pq.isEmpty()) {
+            Route curr = pq.poll();
+            Vertex<Intersection> u = curr.vertex;
+
+            // skip stale entries — a better route to u was already recorded
+            if (curr.bad > badCount.get(u) || (curr.bad == badCount.get(u) && curr.durration > durration.get(u))) {
+                continue;
+            }
+
+            for (VertexDistance<Intersection> vd : roads.getNeighbors(u)) {
+                Vertex<Intersection> v = vd.vertex();
+
+                int newBad = curr.bad;
+                if (avoid.contains(v.data().type())) {
+                    newBad = newBad + 1;
+                }
+
+                int newDur = curr.durration + vd.distance();
+                if (!badCount.containsKey(v) || newBad < badCount.get(v) || (newBad == badCount.get(v) && newDur < durration.get(v))) {
+                    badCount.put(v, newBad);
+                    durration.put(v, newDur);
+                    parent.put(v, u);
+                    pq.add(new Route(v, newBad, newDur));
+                }
+            }
+        }
+
+            if (!badCount.containsKey(endVertex)) {
+                return null;
+            }
+
+            LinkedList<Intersection> route = new LinkedList<>();
+            Vertex<Intersection> node = endVertex;
+            while (node != null) {
+                route.addFirst(node.data());
+                node = parent.get(node);
+            }
+            return route;
+    }
+    //We need this private class because djiakstra's can only hold a single digit.
+    //Therefore, we need this helper class inside to hold a vertex so that badCount can reach it and durration.
+    private static class Route implements Comparable<Route> {
+        private final Vertex<Intersection> vertex;
+        private final int bad;
+        private final int durration;
+
+        private Route(Vertex<Intersection> vertex, int bad, int durration) {
+            this.vertex = vertex;
+            this.bad = bad;
+            this.durration = durration;
+        }
+
+        @Override
+        public int compareTo(Route other) {
+            if (this.bad != other.bad) {
+                return this.bad - other.bad;
+            }   
+            else {
+                return this.durration - other.durration;
+            }
+        }
     }
 
      /**
