@@ -238,7 +238,6 @@ public class GraphAlgorithms {
 
             if (!vSet.contains(vertex)) {
                 vSet.add(vertex);
-                mst.add(curr);
                 mst.add(new Edge<>(vertex, curr.u(), curr.weight()));
 
                 for (VertexDistance<T> next : graph.getNeighbors(vertex)) {
@@ -279,19 +278,16 @@ public class GraphAlgorithms {
         PriorityQueue<Edge<T>> pq = new PriorityQueue<>(graph.getEdges());
 
         //Similar mst.size() < (graph.getVertices().size() - 1) * 2
-        while (!pq.isEmpty() && mst.size() < (graph.getVertices().size() - 1) * 2) {
+        while (!pq.isEmpty() && mst.size() < graph.getVertices().size() - 1) {
             Edge<T> e = pq.poll();
-            Vertex<T> u = e.u();
-            Vertex<T> v = e.v();
 
-            if (!ds.find(u).equals(ds.find(v))) {
+            if (!ds.find(e.u()).equals(ds.find(e.v()))) {
                 mst.add(e);
-                mst.add(new Edge<>(v, u, e.weight()));
-                ds.union(u, v);
+                ds.union(e.u(), e.v());
             }
         }
-        //Similar mst.size() < (graph.getVertices().size() - 1) * 2
-        if (mst.size() != (graph.getVertices().size() - 1) * 2) {
+
+        if (mst.size() != (graph.getVertices().size() - 1)) {
             return null;
         }
         return mst;
