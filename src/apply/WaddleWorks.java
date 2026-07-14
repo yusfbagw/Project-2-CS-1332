@@ -8,6 +8,7 @@ import java.util.Queue;
 import java.util.Set;
 
 import javax.lang.model.type.IntersectionType;
+import javax.swing.text.html.parser.Element;
 
 import apply.Intersection.Type;
 import implement.GraphAlgorithms;
@@ -322,6 +323,75 @@ public class WaddleWorks implements StaticWaddleWorks {
      */
     @Override
     public Building getBestPowerSite(List<Building> candidates) {
-        
+        if (candidates == null) {
+            throw new IllegalArgumentException("Candidates cannot be null.");
+        }
+        if (candidates.isEmpty()) {
+            throw new IllegalArgumentException("Candidates cannot be empty.");
+        }
+
+        for (Building e : candidates) {
+            if (e == null) {
+                throw new IllegalArgumentException("one of the candidates is null cant be.");
+            }
+
+            if (!grid.containsVertex(new Vertex<>(e))) {
+                throw new IllegalArgumentException("A candidate isn't in the grid.");
+            }
+        }
+        Building best = null;
+        double bestAvg = Double.MAX_VALUE; 
+        //One candidate: Map<Vertex<Building>, Integer> distances = GraphAlgorithms.dijkstras(new Vertex<>(candidate), grid);
+        for (Building candidate : candidates) {
+            Map<Vertex<Building>, Integer> distances = GraphAlgorithms.dijkstras(new Vertex<>(candidate), grid);
+            double sum = 0;
+            for (int distance : distances.values()) {
+                sum += distance;
+            }
+            double avg = sum / distances.size();
+            if (avg < bestAvg) {
+                bestAvg = avg;
+                best = candidate;
+            }
+        }
+
+        return best;
+    }
+    
+    /**
+     * Consolidates the electrical grid to the minimum total length of
+     * wire in the grid by removing all unnecessary wiring.
+     *
+     * @return the fraction of wire that was removed
+     * @implSpec {@code O(|W|log(|W|))} runtime
+     */
+    @Override
+    public double consolidateGrid() {
+        if (grid.getEdges().isEmpty()) {
+            return 0.0;
+        }
+
+        double totalBefore = 0;
+        //Gets the weights total before doing anything.
+        for (Edge<Building> e : grid.getEdges()) {
+            totalBefore += e.weight();
+        }
+        Vertex<Building> start = grid.getVertices().iterator().next();
+        Set<Edge<Building>> mst = GraphAlgorithms.prims(start, grid);
+
+        double totalAfter = 0;
+        for (Edge<Building> e: mst) {
+            totalAfter += e.weight();
+        }
+
+        //Now that we got the total after we remove all the other wires that aren't needed in the MST.
+        for (Edge<Building> e: new HashSet<>(grid.getEdges())) {
+            if (!mst.contains(e)) {
+                grid.removeEdge(e);
+            }
+        }
+        //fractionRemoved = amountRemoved/originalTotal
+        double totalWeight = (totalBefore - totalAfter) / totalBefore;
+        return totalWeight;
     }
 }  
