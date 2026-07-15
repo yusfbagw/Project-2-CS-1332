@@ -1,6 +1,5 @@
 package refactor;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -74,6 +73,8 @@ public class DisjointSet<T> {
      * @param second The second data to find the parent of
      */
     public void union(T first, T second) {
+        find(first);
+        find(second);
         union(disjointSet.get(first), disjointSet.get(second));
     }
 

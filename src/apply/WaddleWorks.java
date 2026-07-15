@@ -12,20 +12,18 @@ import apply.Intersection.Type;
 import implement.GraphAlgorithms;
 
 import refactor.DisjointSet;
-import refactor.DisjointSetNode;
 import refactor.Edge;
-import refactor.ExtensionGraph;
 import refactor.MutableGraph;
 import refactor.StaticGraph;
 import refactor.Vertex;
 import refactor.VertexDistance;
 
-public class WaddleWorks implements StaticWaddleWorks { 
+public class WaddleWorks implements StaticWaddleWorks {
     //The 
     private final MutableGraph<Intersection> roads;
     private final MutableGraph<Building> grid;
     private final DisjointSet<Intersection> neighborhoods;
-    
+
     public WaddleWorks(MutableGraph<Intersection> initialRoad, MutableGraph<Building> initialGrid) {
         if (initialRoad == null) {
             throw new IllegalArgumentException("Initial road is null.");
@@ -42,7 +40,7 @@ public class WaddleWorks implements StaticWaddleWorks {
         // We register every intersection first (handles isolated vertices + primes union)
         for (Vertex<Intersection> v : roads.getVertices()) {
             neighborhoods.find(v.data());
-        }   
+        }
 
         Map<Vertex<Intersection>, List<VertexDistance<Intersection>>> adjList = roads.getAdjList();
         for (Map.Entry<Vertex<Intersection>, List<VertexDistance<Intersection>>> entry : adjList.entrySet()) {
@@ -54,6 +52,7 @@ public class WaddleWorks implements StaticWaddleWorks {
             }
         }
     }
+
     /**
      * Gets the number of neighborhoods in the road network.
      * <p>
@@ -64,6 +63,7 @@ public class WaddleWorks implements StaticWaddleWorks {
      * @return the number of neighborhoods
      * @implSpec {@code O(1)} runtime
      */
+    @Override
     public int getNeighborhoodCount() {
         return neighborhoods.getRoots().size();
     }
@@ -80,6 +80,7 @@ public class WaddleWorks implements StaticWaddleWorks {
      * @return whether the edge connects two neighborhoods
      * @implSpec {@code O(1)} runtime
      */
+    @Override
     public boolean addRoad(Intersection a, Intersection b, int duration) {
         if (duration < 0) {
             throw new IllegalArgumentException("Duration can't be negative.");
@@ -91,15 +92,21 @@ public class WaddleWorks implements StaticWaddleWorks {
         //We create the verticies for the intersections.
         Vertex<Intersection> vertexA = new Vertex<>(a);
         Vertex<Intersection> vertexB = new Vertex<>(b);
+
+        Edge<Intersection> newEdge = new Edge<>(vertexA, vertexB, duration);
+
+        //The road already exists, so nothing gets connected and addEdge would throw.
+        if (roads.containsEdge(newEdge)) {
+            return false;
+        }
+
         //We gotta look at if it contains both.
         boolean containsBoth = roads.containsVertex(vertexB) && roads.containsVertex(vertexA);
-        
+
         //They have to be in different neighborhoods.
         //We figure out if a and b already existed in roads.
         boolean connectsTwo = containsBoth && !(neighborhoods.find(a).equals(neighborhoods.find(b)));
-        
-        Edge<Intersection> newEdge = new Edge<>(vertexA, vertexB, duration);
-        
+
         roads.addEdge(newEdge);
         neighborhoods.union(a, b);
         return connectsTwo;
@@ -113,6 +120,7 @@ public class WaddleWorks implements StaticWaddleWorks {
      * @param length the length of the wire
      * @implSpec {@code O(1)} runtime
      */
+    @Override
     public void addWire(Building a, Building b, int length) {
         if (length < 0) {
             throw new IllegalArgumentException("The length can't be negative.");
@@ -130,7 +138,7 @@ public class WaddleWorks implements StaticWaddleWorks {
         if (b.closest() != null && !roads.containsVertex(new Vertex<>(b.closest()))) {
             throw new IllegalArgumentException("No route at all.");
         }
-        
+
         boolean aInGrid = grid.containsVertex(new Vertex<>(a));
         boolean bInGrid = grid.containsVertex(new Vertex<>(b));
         boolean gridNonEmpty = grid.getVertexCount() != 0;
@@ -147,21 +155,24 @@ public class WaddleWorks implements StaticWaddleWorks {
      *
      * @return the current state of the road network
      */
+    @Override
     public StaticGraph<Intersection> getRoads() {
         return roads;
     }
-     /**
+
+    /**
      * Gets the current state of the electrical grid.
      *
      * @return the current state of the electrical grid
      */
+    @Override
     public StaticGraph<Building> getGrid() {
         return grid;
     }
-    
+
     /**
      * Gets a view of certain Intersections organized by neighborhood,
-     * specifically Intersections with a number of adjacent roads in an 
+     * specifically Intersections with a number of adjacent roads in an
      * inclusive range [i, j].
      * <p>
      * This should return a map where the keys are the neighborhoods'
@@ -188,17 +199,17 @@ public class WaddleWorks implements StaticWaddleWorks {
         }
         //Create new map that is going to store the returned neighborhoods.
         Map<Intersection, Set<Intersection>> newMap = new HashMap<>();
-        
+
         //Filter by degree loop
         Map<Vertex<Intersection>, List<VertexDistance<Intersection>>> adjList = roads.getAdjList();
         for (Map.Entry<Vertex<Intersection>, List<VertexDistance<Intersection>>> entry : adjList.entrySet()) {
-            
+
             Vertex<Intersection> vertex = entry.getKey();
             int degree = entry.getValue().size();
 
             if (i <= degree && degree <= j) {
                 Intersection root = neighborhoods.find(vertex.data());
-                
+
                 //If this root has no set yet then create an empty one
                 if (!newMap.containsKey(root)) {
                     newMap.put(root, new HashSet<>());
@@ -254,6 +265,12 @@ public class WaddleWorks implements StaticWaddleWorks {
         //End is turned into a vertex
         Vertex<Intersection> endVertex = new Vertex<>(end);
 
+        //If either endpoint was never added to roads there is no route, and
+        //getNeighbors would throw instead of letting us report that.
+        if (!roads.containsVertex(startVertex) || !roads.containsVertex(endVertex)) {
+            return -1;
+        }
+
         //We use BFS so we use a queue and a distance map.
         // We use a dist map over a vSet because does double if a vertex is a key it's been visited and its value is the hop count to reach it
         Queue<Vertex<Intersection>> queue = new LinkedList<>();
@@ -268,7 +285,7 @@ public class WaddleWorks implements StaticWaddleWorks {
             for (VertexDistance<Intersection> vd : roads.getNeighbors(curr)) {
                 Vertex<Intersection> neighbor = vd.vertex();
                 if (!dist.containsKey(neighbor)) {
-                    dist.put(neighbor, dist.get(curr)+ 1);
+                    dist.put(neighbor, dist.get(curr) + 1);
                     queue.add(neighbor);
                 }
             }
@@ -308,12 +325,16 @@ public class WaddleWorks implements StaticWaddleWorks {
             throw new IllegalArgumentException("Avoid can't be null.");
         }
 
-
         Intersection start = from.closest();
         Intersection end = to.closest();
         //Create the intersection verticies
         Vertex<Intersection> startVertex = new Vertex<>(start);
         Vertex<Intersection> endVertex = new Vertex<>(end);
+
+        //Same guard as getMinBetween: no vertex in roads means no route to build.
+        if (!roads.containsVertex(startVertex) || !roads.containsVertex(endVertex)) {
+            return null;
+        }
 
         //Two parallel HashMaps for storing two costs per vertex
         Map<Vertex<Intersection>, Integer> badCount = new HashMap<>(); // The fewest bad to reach each vertex
@@ -321,7 +342,7 @@ public class WaddleWorks implements StaticWaddleWorks {
 
         Map<Vertex<Intersection>, Vertex<Intersection>> parent = new HashMap<>(); // Who the you come from ur "parent"
         PriorityQueue<Route> pq = new PriorityQueue<>();
-        
+
         int startBad = avoid.contains(start.type()) ? 1 : 0;
         badCount.put(startVertex, startBad);
         durration.put(startVertex, 0);
@@ -332,7 +353,8 @@ public class WaddleWorks implements StaticWaddleWorks {
             Vertex<Intersection> u = curr.vertex;
 
             // skip stale entries — a better route to u was already recorded
-            if (curr.bad > badCount.get(u) || (curr.bad == badCount.get(u) && curr.durration > durration.get(u))) {
+            if (curr.bad > badCount.get(u)
+                    || (curr.bad == badCount.get(u) && curr.durration > durration.get(u))) {
                 continue;
             }
 
@@ -345,7 +367,8 @@ public class WaddleWorks implements StaticWaddleWorks {
                 }
 
                 int newDur = curr.durration + vd.distance();
-                if (!badCount.containsKey(v) || newBad < badCount.get(v) || (newBad == badCount.get(v) && newDur < durration.get(v))) {
+                if (!badCount.containsKey(v) || newBad < badCount.get(v)
+                        || (newBad == badCount.get(v) && newDur < durration.get(v))) {
                     badCount.put(v, newBad);
                     durration.put(v, newDur);
                     parent.put(v, u);
@@ -354,18 +377,19 @@ public class WaddleWorks implements StaticWaddleWorks {
             }
         }
 
-            if (!badCount.containsKey(endVertex)) {
-                return null;
-            }
+        if (!badCount.containsKey(endVertex)) {
+            return null;
+        }
 
-            LinkedList<Intersection> route = new LinkedList<>();
-            Vertex<Intersection> node = endVertex;
-            while (node != null) {
-                route.addFirst(node.data());
-                node = parent.get(node);
-            }
-            return route;
+        LinkedList<Intersection> route = new LinkedList<>();
+        Vertex<Intersection> node = endVertex;
+        while (node != null) {
+            route.addFirst(node.data());
+            node = parent.get(node);
+        }
+        return route;
     }
+
     //We need this private class because djiakstra's can only hold a single digit.
     //Therefore, we need this helper class inside to hold a vertex so that badCount can reach it and durration.
     private static class Route implements Comparable<Route> {
@@ -383,14 +407,13 @@ public class WaddleWorks implements StaticWaddleWorks {
         public int compareTo(Route other) {
             if (this.bad != other.bad) {
                 return this.bad - other.bad;
-            }   
-            else {
+            } else {
                 return this.durration - other.durration;
             }
         }
     }
 
-     /**
+    /**
      * Given a list of {@code k} candidate Buildings, select the one
      * that would be most "central" to the grid as a power site.
      * <p>
@@ -420,7 +443,7 @@ public class WaddleWorks implements StaticWaddleWorks {
             }
         }
         Building best = null;
-        double bestAvg = Double.MAX_VALUE; 
+        double bestAvg = Double.MAX_VALUE;
         //One candidate: Map<Vertex<Building>, Integer> distances = GraphAlgorithms.dijkstras(new Vertex<>(candidate), grid);
         for (Building candidate : candidates) {
             Map<Vertex<Building>, Integer> distances = GraphAlgorithms.dijkstras(new Vertex<>(candidate), grid);
@@ -437,7 +460,7 @@ public class WaddleWorks implements StaticWaddleWorks {
 
         return best;
     }
-    
+
     /**
      * Consolidates the electrical grid to the minimum total length of
      * wire in the grid by removing all unnecessary wiring.
@@ -459,13 +482,18 @@ public class WaddleWorks implements StaticWaddleWorks {
         Vertex<Building> start = grid.getVertices().iterator().next();
         Set<Edge<Building>> mst = GraphAlgorithms.prims(start, grid);
 
+        //prims returns null on a disconnected grid, so there is nothing to consolidate.
+        if (mst == null) {
+            return 0.0;
+        }
+
         double totalAfter = 0;
-        for (Edge<Building> e: mst) {
+        for (Edge<Building> e : mst) {
             totalAfter += e.weight();
         }
 
         //Now that we got the total after we remove all the other wires that aren't needed in the MST.
-        for (Edge<Building> e: new HashSet<>(grid.getEdges())) {
+        for (Edge<Building> e : new HashSet<>(grid.getEdges())) {
             if (!mst.contains(e)) {
                 grid.removeEdge(e);
             }
@@ -474,4 +502,4 @@ public class WaddleWorks implements StaticWaddleWorks {
         double totalWeight = (totalBefore - totalAfter) / totalBefore;
         return totalWeight;
     }
-}  
+}

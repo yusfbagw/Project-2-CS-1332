@@ -181,7 +181,7 @@ public class GraphAlgorithms {
 
                 for (VertexDistance<T> next : graph.getAdjList().get(u)) {
                     //If the visited set doesn't contain the next vertex
-                    if (!vSet.contains(next)) {
+                    if (!vSet.contains(next.vertex())) {
                         //new distance = curr dist + next dist
                         int newDist = dist.get(u) + next.distance();
                         if (newDist < dist.get(next.vertex())) {
@@ -238,7 +238,7 @@ public class GraphAlgorithms {
 
             if (!vSet.contains(vertex)) {
                 vSet.add(vertex);
-                mst.add(new Edge<>(vertex, curr.u(), curr.weight()));
+                mst.add(curr);
 
                 for (VertexDistance<T> next : graph.getNeighbors(vertex)) {
                     if (!vSet.contains(next.vertex())) {
