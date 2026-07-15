@@ -18,12 +18,21 @@ import refactor.StaticGraph;
 import refactor.Vertex;
 import refactor.VertexDistance;
 
+/**
+ * Implementation of the WaddleWorks city planning API.
+ */
 public class WaddleWorks implements StaticWaddleWorks {
-    //The 
     private final MutableGraph<Intersection> roads;
     private final MutableGraph<Building> grid;
     private final DisjointSet<Intersection> neighborhoods;
 
+    /**
+     * Constructs a WaddleWorks instance from an initial road network and
+     * electrical grid.
+     *
+     * @param initialRoad the initial graph of the road network
+     * @param initialGrid the initial graph of the electrical grid network
+     */
     public WaddleWorks(MutableGraph<Intersection> initialRoad, MutableGraph<Building> initialGrid) {
         if (initialRoad == null) {
             throw new IllegalArgumentException("Initial road is null.");
@@ -272,7 +281,8 @@ public class WaddleWorks implements StaticWaddleWorks {
         }
 
         //We use BFS so we use a queue and a distance map.
-        // We use a dist map over a vSet because does double if a vertex is a key it's been visited and its value is the hop count to reach it
+        // We use a dist map over a vSet because it does double duty: if a vertex is a key
+        // it's been visited, and its value is the hop count to reach it
         Queue<Vertex<Intersection>> queue = new LinkedList<>();
         Map<Vertex<Intersection>, Integer> dist = new HashMap<>();
 
@@ -297,6 +307,19 @@ public class WaddleWorks implements StaticWaddleWorks {
         return dist.get(endVertex);
     }
 
+    /**
+     * Calculates the shortest duration path between two Buildings that
+     * avoids certain types of Intersections. Prioritize avoiding the
+     * undesirable Intersections, even if that means taking a longer path.
+     *
+     * @param from the start Building
+     * @param to the end Building
+     * @param avoid the set of Intersection types to avoid when possible
+     * @return the list of Intersections to travel to, in order
+     * @implSpec
+     * <li> {@code O(|R|log(|R|))} runtime
+     * <li> <b>No space complexity requirement</b>
+     */
     @Override
     public List<Intersection> calculateRoute(Building from, Building to, Set<Type> avoid) {
         if (from == null) {
@@ -390,29 +413,6 @@ public class WaddleWorks implements StaticWaddleWorks {
         return route;
     }
 
-    //We need this private class because djiakstra's can only hold a single digit.
-    //Therefore, we need this helper class inside to hold a vertex so that badCount can reach it and durration.
-    private static class Route implements Comparable<Route> {
-        private final Vertex<Intersection> vertex;
-        private final int bad;
-        private final int durration;
-
-        private Route(Vertex<Intersection> vertex, int bad, int durration) {
-            this.vertex = vertex;
-            this.bad = bad;
-            this.durration = durration;
-        }
-
-        @Override
-        public int compareTo(Route other) {
-            if (this.bad != other.bad) {
-                return this.bad - other.bad;
-            } else {
-                return this.durration - other.durration;
-            }
-        }
-    }
-
     /**
      * Given a list of {@code k} candidate Buildings, select the one
      * that would be most "central" to the grid as a power site.
@@ -444,7 +444,8 @@ public class WaddleWorks implements StaticWaddleWorks {
         }
         Building best = null;
         double bestAvg = Double.MAX_VALUE;
-        //One candidate: Map<Vertex<Building>, Integer> distances = GraphAlgorithms.dijkstras(new Vertex<>(candidate), grid);
+        //One candidate: Map<Vertex<Building>, Integer> distances =
+        //GraphAlgorithms.dijkstras(new Vertex<>(candidate), grid);
         for (Building candidate : candidates) {
             Map<Vertex<Building>, Integer> distances = GraphAlgorithms.dijkstras(new Vertex<>(candidate), grid);
             double sum = 0;
@@ -501,5 +502,35 @@ public class WaddleWorks implements StaticWaddleWorks {
         //fractionRemoved = amountRemoved/originalTotal
         double totalWeight = (totalBefore - totalAfter) / totalBefore;
         return totalWeight;
+    }
+
+    //We need this private class because djiakstra's can only hold a single digit.
+    //Therefore, we need this helper class inside to hold a vertex so that badCount can reach it and durration.
+    private static class Route implements Comparable<Route> {
+        private final Vertex<Intersection> vertex;
+        private final int bad;
+        private final int durration;
+
+        /**
+         * Constructs a Route entry for the priority queue.
+         *
+         * @param vertex the intersection this route reaches
+         * @param bad the number of avoided-type intersections on the path
+         * @param durration the total duration of the path
+         */
+        private Route(Vertex<Intersection> vertex, int bad, int durration) {
+            this.vertex = vertex;
+            this.bad = bad;
+            this.durration = durration;
+        }
+
+        @Override
+        public int compareTo(Route other) {
+            if (this.bad != other.bad) {
+                return this.bad - other.bad;
+            } else {
+                return this.durration - other.durration;
+            }
+        }
     }
 }

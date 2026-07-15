@@ -34,7 +34,7 @@ public class GraphAlgorithms {
      *                                  doesn't exist in the graph
      */
     public static <T> List<Vertex<T>> bfs(Vertex<T> start, StaticGraph<T> graph) {
-         if (start == null) {
+        if (start == null) {
             throw new IllegalArgumentException("Start is null");
         }
         if (graph == null) {
@@ -83,7 +83,7 @@ public class GraphAlgorithms {
      * lose all points for this method.
      */
     public static <T> List<Vertex<T>> dfs(Vertex<T> start, StaticGraph<T> graph) {
-         if (start == null) {
+        if (start == null) {
             throw new IllegalArgumentException("Start is null");
         }
         if (graph == null) {
@@ -102,7 +102,7 @@ public class GraphAlgorithms {
 
     /**
      * Recursive helper method for DFS.
-     * 
+     *
      * @param <T>   the generic typing of the data
      * @param curr  the current vertex being explored
      * @param g     the graph being searched through
@@ -143,7 +143,7 @@ public class GraphAlgorithms {
      *                                  doesn't exist in the graph.
      */
     public static <T> Map<Vertex<T>, Integer> dijkstras(Vertex<T> start, StaticGraph<T> graph) {
-         if (start == null) {
+        if (start == null) {
             throw new IllegalArgumentException("Start is null");
         }
         if (graph == null) {
@@ -160,7 +160,7 @@ public class GraphAlgorithms {
         //You need a PrioirityQueue holds vertexdistance not vertex
         PriorityQueue<VertexDistance<T>> pq = new PriorityQueue<>();
 
-        //For each vertex in the graph we loop through and 
+        //For each vertex in the graph we loop through and
         //put the distance from that into the dist HashMap w/ the max value of the weights
         for (Vertex<T> v : graph.getVertices()) {
             dist.put(v, Integer.MAX_VALUE);
@@ -272,7 +272,7 @@ public class GraphAlgorithms {
         if (graph == null) {
             throw new IllegalArgumentException("Graph is null can't be null.");
         }
-        
+
         DisjointSet<Vertex<T>> ds = new DisjointSet<>();
         Set<Edge<T>> mst = new HashSet<>();
         PriorityQueue<Edge<T>> pq = new PriorityQueue<>(graph.getEdges());

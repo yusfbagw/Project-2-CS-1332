@@ -44,15 +44,15 @@ public class Main {
      * @throws IllegalArgumentException if any of the arguments are null, or
      * if the vertex set doesn't contain all the vertices.
      */
-    public static <T> MutableGraph<T> getMutableGraphInstance(Set<Vertex<T>> vertices,Set<Edge<T>> edges) {
-       if (vertices == null) {
-        throw new IllegalArgumentException("verticies arg cant be null");
-       }
-       if (edges == null) {
-        throw new IllegalArgumentException("edges arg cant be null.");
-       }
+    public static <T> MutableGraph<T> getMutableGraphInstance(Set<Vertex<T>> vertices, Set<Edge<T>> edges) {
+        if (vertices == null) {
+            throw new IllegalArgumentException("verticies arg cant be null");
+        }
+        if (edges == null) {
+            throw new IllegalArgumentException("edges arg cant be null.");
+        }
 
-       return new ExtensionGraph<>(vertices, edges);
+        return new ExtensionGraph<>(vertices, edges);
     }
 
     /**
@@ -63,7 +63,8 @@ public class Main {
      * @param grid the initial graph of the electrical grid network
      * @return a new {@link StaticWaddleWorks} instance
      */
-    public static StaticWaddleWorks getWaddleWorksInstance(MutableGraph<Intersection> roads, MutableGraph<Building> grid) {
+    public static StaticWaddleWorks getWaddleWorksInstance(MutableGraph<Intersection> roads,
+            MutableGraph<Building> grid) {
         return new WaddleWorks(roads, grid);
     }
 }
